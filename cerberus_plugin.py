@@ -6,7 +6,7 @@ from cerberus import Validator
 class CerberusPlugin(object):
     name = 'CerberusPlugin'
     api = 2
-    keyword = 'schema'
+    keyword = 'schemas'
 
     def config_to_dict(self, cfg, result=None):
         if isinstance(cfg, ConfigDict.Namespace):
@@ -21,10 +21,10 @@ class CerberusPlugin(object):
             return cfg
 
     def apply(self, callback, route):
-        schema = self.config_to_dict(route.config.get(self.keyword, None))
-        if not schema:
+        schemas = self.config_to_dict(route.config.get(self.keyword, None))
+        if not schemas:
             return callback
-        validators = {k: Validator(schema[k]) for k in schema}
+        validators = {k: Validator(schemas[k]) for k in schemas}
 
         @wraps(callback)
         def wrapper(*args, **kwargs):
@@ -33,13 +33,13 @@ class CerberusPlugin(object):
                         'query_string': request.query}
 
             for k in validators:
-                shortcut[k] = validators[k].normalized(shortcut[k])
+                # modify original reference
+                for k2, v in validators[k].normalized(shortcut[k]).items():
+                    shortcut[k][k2] = v
+
                 if not validators[k].validate(shortcut[k]):
                     raise HTTPError(400, "bad request")
 
-            kwargs = shortcut['url']
-            request.json = shortcut['body']
-            request.query = shortcut['query_string']
             return callback(*args, **kwargs)
 
         return wrapper

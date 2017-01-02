@@ -27,7 +27,7 @@ readme = read_md('README.md')
 
 setup(
     name='bottle-cerberus',
-    version='0.0.1',
+    version='1.0.0',
     description='Cerberus plugin for bottle',
     long_description=readme,
     author='Alberto Galera Jimenez',
@@ -38,7 +38,7 @@ setup(
     install_requires=['cerberus==1.0.1'],
     license="GPL",
     zip_safe=False,
-    keywords='bottlejwt',
+    keywords='bottle-cerberus',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Topic :: Software Development :: Libraries :: Python Modules',

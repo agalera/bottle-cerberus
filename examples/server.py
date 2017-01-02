@@ -2,9 +2,14 @@ from bottle import get, install, run
 from cerberus_plugin import CerberusPlugin
 
 
-@get("/example/<number>", schema={'url': {'number': {'coerce': int}}})
-def example(number):
-    return "the best number %s!" % number
+@get('/cerberus/<ex>', schemas={'body': {'ex': {'type': 'integer'}},
+                                'url': {'ex': {'coerce': int}},
+                                'query_string': {'ex': {'coerce': int}}})
+def test_cerberus(ex):
+    from bottle import request
+    print("query_string", request.query['ex'], type(request.query['ex']))
+    print("url", ex, type(ex))
+    print("body", request.json.get('ex'), type(request.json.get('ex')))
 
 
 install(CerberusPlugin())
