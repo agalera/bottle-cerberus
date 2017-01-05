@@ -1,4 +1,3 @@
-# Currently under development, unstable version!
 # Cerberus plugin
 Cerberus plugin for bottle
 
