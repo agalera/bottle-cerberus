@@ -13,7 +13,7 @@ Or clone:
 ## example:
 ```python
 from bottle import get, install, run
-from cerberus_plugin import CerberusPlugin
+from bottle_cerberus import CerberusPlugin
 
 
 @get('/cerberus/<ex>', schemas={'body': {'ex': {'type': 'integer'}},
