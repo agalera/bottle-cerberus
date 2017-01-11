@@ -1,4 +1,3 @@
-# Currently under development, unstable version!
 # Cerberus plugin
 Cerberus plugin for bottle
 
@@ -38,7 +37,9 @@ run(host="0.0.0.0", port="9988")
 ## Optional keys
 
 body: schema for request.json
+
 url: schema for url (no query string)
+
 query_string: schema for query strings
 
 # Schema
