@@ -3,6 +3,11 @@ from functools import wraps
 from cerberus import Validator
 
 
+class MyValidator(Validator):
+    def _validate_type_objectid(*args, **kwargs):
+        return True
+
+
 class CerberusPlugin(object):
     name = 'CerberusPlugin'
     api = 2
@@ -24,7 +29,7 @@ class CerberusPlugin(object):
         schemas = self.config_to_dict(route.config.get(self.keyword, None))
         if not schemas:
             return callback
-        validators = {k: Validator(schemas[k]) for k in schemas}
+        validators = {k: MyValidator(schemas[k]) for k in schemas}
 
         @wraps(callback)
         def wrapper(*args, **kwargs):
