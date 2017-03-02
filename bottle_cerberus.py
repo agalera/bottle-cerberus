@@ -13,34 +13,39 @@ class CerberusPlugin(object):
     api = 2
     keyword = 'schemas'
 
-    def config_to_dict(self, cfg, result=None):
-        if isinstance(cfg, ConfigDict.Namespace):
-            # initial dict
-            if not result:
-                result = {}
-
-            for k in cfg:
-                result[k] = self.config_to_dict(cfg[k], {})
-            return result
-        else:
-            return cfg
-
     def apply(self, callback, route):
-        schemas = self.config_to_dict(route.config.get(self.keyword, None))
-        if not schemas:
+        schemas = {}
+        for namespace in route.config:
+            if self.keyword == namespace[:len(self.keyword)]:
+                old = schemas
+                final = namespace.split('.')[-1]
+                for key in namespace.split('.')[1:]:
+                    if key not in old:
+                        if final == key:
+                            old[key] = route.config[namespace]
+                            continue
+                        old[key] = {}
+                    old = old[key]
+
+        if schemas == {}:
             return callback
-        validators = {k: MyValidator(schemas[k]) for k in schemas}
+
+        validators = {k: MyValidator(schemas[k],
+                                     allow_unknown=True) for k in schemas}
 
         @wraps(callback)
         def wrapper(*args, **kwargs):
+            print("cerberus")
             shortcut = {'url': kwargs,
                         'body': request.json or {},
-                        'query_string': request.query}
+                        'query_string': {k: v for k, v in request.query.items()}}
 
             for k in validators:
                 # modify original reference
-                for k2, v in validators[k].normalized(shortcut[k]).items():
-                    shortcut[k][k2] = v
+                shortcut[k] = validators[k].normalized(shortcut[k])
+
+                if shortcut[k] is None:
+                    raise HTTPError(400, "bad request")
 
                 if not validators[k].validate(shortcut[k]):
                     raise HTTPError(400, "bad request")
