@@ -35,7 +35,6 @@ class CerberusPlugin(object):
 
         @wraps(callback)
         def wrapper(*args, **kwargs):
-            print("cerberus")
             shortcut = {'url': kwargs,
                         'body': request.json or {},
                         'query_string': {k: v for k, v in request.query.items()}}
@@ -44,10 +43,8 @@ class CerberusPlugin(object):
                 # modify original reference
                 shortcut[k] = validators[k].normalized(shortcut[k])
 
-                if shortcut[k] is None:
-                    raise HTTPError(400, "bad request")
-
-                if not validators[k].validate(shortcut[k]):
+                if (shortcut[k] is None or
+                        not validators[k].validate(shortcut[k])):
                     raise HTTPError(400, "bad request")
 
             return callback(*args, **kwargs)
