@@ -1,7 +1,11 @@
 import abc
+import json
 import functools
 import bottle
 import cerberus
+
+
+JSON_CONTENT_TYPE = 'application/json'
 
 
 class Schema(metaclass=abc.ABCMeta):
@@ -12,6 +16,12 @@ class Schema(metaclass=abc.ABCMeta):
 
 class MissingSchemaError(Exception):
     pass
+
+
+class JSONError(bottle.HTTPResponse):
+    def __init__(self, status, body):
+        super(JSONError, self).__init__(json.dumps(body), status)
+        self.content_type = 'application/json'
 
 
 class CerberusPlugin(object):
@@ -60,7 +70,14 @@ class CerberusPlugin(object):
 
                 if (shortcut[k] is None or
                         not validators[k].validate(shortcut[k])):
-                    raise bottle.HTTPError(400, "bad request")
+
+                    status = 400
+                    body = validators[k].errors
+
+                    if JSON_CONTENT_TYPE in bottle.request.content_type:
+                        raise JSONError(status, body)
+                    else:
+                        raise bottle.HTTPError(status, body)
 
             return callback(*args, **kwargs)
 
