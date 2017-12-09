@@ -1,11 +1,17 @@
-from bottle import HTTPError, ConfigDict, request
-from functools import wraps
-from cerberus import Validator
+import abc
+import functools
+import bottle
+import cerberus
 
 
-class MyValidator(Validator):
-    def _validate_type_objectid(*args, **kwargs):
-        return True
+class Schema(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def schema(self):
+        pass
+
+
+class MissingSchemaError(Exception):
+    pass
 
 
 class CerberusPlugin(object):
@@ -22,7 +28,10 @@ class CerberusPlugin(object):
                 for key in namespace.split('.')[1:]:
                     if key not in old:
                         if final == key:
-                            old[key] = route.config[namespace]
+                            if not isinstance(route.config[namespace], Schema):
+                                raise MissingSchemaError(
+                                    "Missing Schema class")
+                            old[key] = route.config[namespace].schema()
                             continue
                         old[key] = {}
                     old = old[key]
@@ -30,22 +39,28 @@ class CerberusPlugin(object):
         if schemas == {}:
             return callback
 
-        validators = {k: MyValidator(schemas[k],
-                                     allow_unknown=True) for k in schemas}
+        validators = {
+            k: cerberus.Validator(
+                schemas[k], allow_unknown=True) for k in schemas
+        }
 
-        @wraps(callback)
+        @functools.wraps(callback)
         def wrapper(*args, **kwargs):
-            shortcut = {'url': kwargs,
-                        'body': request.json or {},
-                        'query_string': {k: v for k, v in request.query.items()}}
+            shortcut = {
+                'url': kwargs,
+                'body': bottle.request.json or {},
+                'query_string': {
+                    k: v for k, v in iter(bottle.request.query)
+                }
+            }
 
             for k in validators:
-                # modify original reference
+                 # modify original reference
                 shortcut[k] = validators[k].normalized(shortcut[k])
 
                 if (shortcut[k] is None or
                         not validators[k].validate(shortcut[k])):
-                    raise HTTPError(400, "bad request")
+                    raise bottle.HTTPError(400, "bad request")
 
             return callback(*args, **kwargs)
 
