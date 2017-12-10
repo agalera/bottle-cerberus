@@ -1,6 +1,7 @@
 import abc
 import json
 import functools
+
 import bottle
 import cerberus
 
@@ -65,7 +66,7 @@ class CerberusPlugin(object):
             }
 
             for k in validators:
-                 # modify original reference
+                # modify original reference
                 shortcut[k] = validators[k].normalized(shortcut[k])
 
                 if (shortcut[k] is None or
