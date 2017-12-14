@@ -61,7 +61,7 @@ class CerberusPlugin(object):
                 'url': kwargs,
                 'body': bottle.request.json or {},
                 'query_string': {
-                    k: v for k, v in iter(bottle.request.query)
+                    k: v for k, v in bottle.request.query.items()
                 }
             }
 
