@@ -27,7 +27,7 @@ readme = read_md('README.md')
 
 setup(
     name='bottle-cerberus',
-    version='1.1.0',
+    version='1.1.2',
     description='Cerberus plugin for bottle',
     long_description=readme,
     author='Alberto Galera Jimenez',
