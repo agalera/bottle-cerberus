@@ -1,10 +1,22 @@
 from bottle import get, install, run
-from cerberus_plugin import CerberusPlugin
+from bottle_cerberus import CerberusPlugin, Schema
 
 
-@get('/cerberus/<ex>', schemas={'body': {'ex': {'type': 'integer'}},
-                                'url': {'ex': {'coerce': int}},
-                                'query_string': {'ex': {'coerce': int}}})
+class ExampleSchema(Schema):
+    def schema(self):
+        return {
+            'ex': {'type': 'integer'},
+            'url': {'ex': {'coerce': int}}
+        }
+
+
+class QuerySchema(Schema):
+    def schema(self):
+        return {'ex': {'coerce': int}}
+
+
+@get('/cerberus/<ex>', schemas={'body': ExampleSchema(),
+                                'query_string': QuerySchema())
 def test_cerberus(ex):
     from bottle import request
     print("query_string", request.query['ex'], type(request.query['ex']))
