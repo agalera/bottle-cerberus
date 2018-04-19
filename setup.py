@@ -32,7 +32,7 @@ setup(
     long_description=readme,
     author='Alberto Galera Jimenez',
     author_email='galerajimenez@gmail.com',
-    url='https://github.com/kianxineki/bottle-cerberus',
+    url='https://github.com/agalera/bottle-cerberus',
     py_modules=['bottle_cerberus'],
     include_package_data=True,
     install_requires=['cerberus==1.0.1'],

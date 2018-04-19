@@ -7,7 +7,7 @@ Via pip:
 ```pip install bottle-cerberus```
 
 Or clone:
-```git clone https://github.com/kianxineki/bottle-cerberus.git```
+```git clone https://github.com/agalera/bottle-cerberus.git```
 
 
 ## example:
